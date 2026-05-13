@@ -2,17 +2,20 @@
         const getEl = (id) => document.getElementById(id);
         const mv = getEl('clock-model');
 
-        // Funkcja wymuszająca start wszystkich animacji
+        // WYMUSZENIE WSZYSTKICH ANIMACJI (Three.js hack)
         mv.addEventListener('load', () => {
-            const names = mv.availableAnimations;
-            if (names && names.length > 0) {
-                names.forEach(anim => {
-                    // To uruchomi każdą znalezioną ścieżkę
-                    mv.animationName = anim; 
-                    mv.play();
+            const symbol = Object.getOwnPropertySymbols(mv).find(s => s.description === 'scene');
+            const scene = mv[symbol];
+            
+            if (scene && scene.animations) {
+                scene.animations.forEach((clip) => {
+                    mv.play(); // Uruchamia bazowy mechanizm
+                    // Dostęp do wewnętrznego miksera model-viewer
+                    const mixer = mv[Object.getOwnPropertySymbols(mv).find(s => s.description === 'mixer')];
+                    if (mixer) {
+                        mixer.clipAction(clip).play();
+                    }
                 });
-                // Jeśli model ma wiele ścieżek, poniższa linia próbuje je zsynchronizować
-                mv.animationName = names[0]; 
             }
         });
 
@@ -30,8 +33,10 @@
         };
 
         const togglePanel = (showId, hideId) => {
-            getEl(hideId).classList.remove('visible');
-            getEl(showId).classList.toggle('visible');
+            const s = getEl(showId);
+            const h = getEl(hideId);
+            if (h) h.classList.remove('visible');
+            if (s) s.classList.toggle('visible');
         };
 
         getEl('toggle-strn').onclick = () => togglePanel('panel-strn', 'panel-czasowniki');
