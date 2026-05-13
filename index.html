@@ -113,9 +113,17 @@
         const getEl = (id) => document.getElementById(id);
         const mv = getEl('clock-model');
 
+        const CONFIG = {
+            mobileOrbit: "180deg 75deg 110%",
+            desktopOrbit: "180deg 75deg 120%",
+            mobileTarget: "0m 0.18m 0m",
+            desktopTarget: "0m 0.15m 0m"
+        };
+
         getEl('reset-view').onclick = () => {
-            mv.cameraOrbit = "180deg 75deg 120%";
-            mv.cameraTarget = "0m 0.15m 0m";
+            const isMob = window.innerWidth < 768;
+            mv.cameraOrbit = isMob ? CONFIG.mobileOrbit : CONFIG.desktopOrbit;
+            mv.cameraTarget = isMob ? CONFIG.mobileTarget : CONFIG.desktopTarget;
         };
 
         const togglePanel = (showId, hideId) => {
@@ -134,14 +142,16 @@
 
         const pauseBtn = getEl('pause-toggle');
         pauseBtn.onclick = () => {
-            if (mv.paused) {
-                mv.play();
-                getEl('icon-pause').style.display = 'block';
-                getEl('icon-play').style.display = 'none';
-            } else {
+            if (pauseBtn.dataset.paused !== "true") {
                 mv.pause();
                 getEl('icon-pause').style.display = 'none';
                 getEl('icon-play').style.display = 'block';
+                pauseBtn.dataset.paused = "true";
+            } else {
+                mv.play();
+                getEl('icon-pause').style.display = 'block';
+                getEl('icon-play').style.display = 'none';
+                pauseBtn.dataset.paused = "false";
             }
         };
 
